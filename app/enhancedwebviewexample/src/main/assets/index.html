@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title>Anbox Streaming SDK Example</title>
+    <link rel="shortcut icon" href="#">
+</head>
+
+<body>
+<link rel="stylesheet" type="text/css" href="css/style.css">
+<script type="module">
+    import {AnboxStream, AnboxStreamGatewayConnector} from './js/anbox-stream-sdk.js';
+
+    // Connectors will enable communication between the client and the
+    // gateway. They can be customized to add an additional layer between
+    // the client and the gateway in order to add more features (user management,
+    // limits, analytics, etc).
+    // For instance, to add user management, you would create a connector that
+    // would communicate with a service you own, which in turn would talk to the
+    // stream gateway to create an actual streaming session.
+    // The connector would pass that session information to the SDK which takes
+    // care of the rest.
+    const connector = new AnboxStreamGatewayConnector({
+        url: Android.getGetewayURL(),
+        authToken: Android.getAPIToken(),
+        session: {
+            app: Android.getAppName(),
+        },
+        screen: {
+          width: 720,
+          height: 1280,
+          fps: 25,
+        }
+    });
+
+    let stream = new AnboxStream({
+
+        connector: connector,
+        targetElement: "anbox-stream",
+        controls: {
+          mouse: true,
+        },
+        devices: {
+          speaker: true,
+        },
+        callbacks: {
+            error: error => {
+                console.error("AnboxStream failed: ", error);
+            },
+            requestCameraAccess: () => {
+                return window.confirm("Anbox Cloud requires to access the camera device")
+            }
+        },
+        dataChannels: {
+            "theone": {
+      callbacks: {
+        close: () => {
+          console.log('data channel is closed')
+        },
+        open: () => {
+          console.log('data channel is open')
+        },
+        error: (err) => {
+          console.log(`error: ${err}`)
+        },
+        message: (data) => {
+          console.log(`data received: ${data}`)
+        }
+      }
+    }
+  }
+    });
+    stream.connect();
+</script>
+<div id="anbox-stream" style="width: 100vw; height: 100vh;"></div>
+</body>
