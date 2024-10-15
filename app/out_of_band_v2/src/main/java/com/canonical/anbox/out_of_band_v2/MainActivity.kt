@@ -15,10 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
 package com.canonical.anbox.out_of_band_v2
-
 
 import android.content.DialogInterface
 import android.content.Intent
@@ -38,17 +35,13 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.canonical.anbox.out_of_band_v2.DataReadTask.DataReadListener
+import com.google.android.material.snackbar.Snackbar
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.OutputStream
 import java.lang.reflect.InvocationTargetException
 
-
 class MainActivity : AppCompatActivity(), DataReadListener {
-
-//    lateinit var data: Parcel
-//    lateinit var reply: Parcel
-
     private val mService: IBinder? by lazy {
         try {
             val method = Class.forName("android.os.ServiceManager")
@@ -65,11 +58,13 @@ class MainActivity : AppCompatActivity(), DataReadListener {
         }catch (e: NullPointerException){
             e.printStackTrace()
         }
+
         null
     }
 
     private var mDataReadTask: DataReadTask? = null
     private var mFd: ParcelFileDescriptor? = null
+
     private var mConnectedChannel: String? = null
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -126,7 +121,7 @@ class MainActivity : AppCompatActivity(), DataReadListener {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
 
-        val channelName = intent.getStringExtra("channelName")
+        val channelName = "theone"/*intent.getStringExtra("channelName")*/
         val data = intent.getStringExtra("data")
 
         // Connect data channel and send data on demand
@@ -142,7 +137,7 @@ class MainActivity : AppCompatActivity(), DataReadListener {
         }
     }
 
-       private val dataProxyService: IBinder?
+    /*    private val dataProxyService: IBinder?
             get() {
                 // The `android.os.ServiceManager` is a hidden class and can not accessed directly
                 // from normal application unless it's an system app. So either of the following two
@@ -165,20 +160,19 @@ class MainActivity : AppCompatActivity(), DataReadListener {
                 }
 
                 return service
-            }
+            }*/
 
     private fun readDataFromChannel(channel: String) {
-               val builder = AlertDialog.Builder(this)
+        /*        val builder = AlertDialog.Builder(this)
                 builder.setNegativeButton(
                     "Cancel",
                     (DialogInterface.OnClickListener { dialog: DialogInterface, which: Int -> dialog.dismiss() })
-                )
+                )*/
 
         if (mConnectedChannel != null && mConnectedChannel == channel) return
 
         val data = Parcel.obtain()
         val reply = Parcel.obtain()
-
         try {
             data.writeInterfaceToken(ANBOX_WEBRTC_DATA_CHANNEL_INTERFACE)
             data.writeString(channel)
@@ -217,8 +211,7 @@ class MainActivity : AppCompatActivity(), DataReadListener {
         }
     }
 
-    // the data we get from the physical device -> text
-    override fun onDataRead(readBytes: ByteArray) { //process the data here
+    override fun onDataRead(readBytes: ByteArray) {
         val text = String(readBytes)
         val textView = findViewById<TextView>(R.id.textReceived)
         textView.text = """
@@ -227,7 +220,6 @@ class MainActivity : AppCompatActivity(), DataReadListener {
             """.trimIndent()
         Log.i(TAG, "channel: $mConnectedChannel data: $text")
     }
-
 
     private fun sendData(text: String) {
         val ostream: OutputStream = FileOutputStream(mFd!!.fileDescriptor)
@@ -238,7 +230,6 @@ class MainActivity : AppCompatActivity(), DataReadListener {
             ex.printStackTrace()
         }
     }
-
 
     companion object {
         private const val TAG = "DataChannel"
