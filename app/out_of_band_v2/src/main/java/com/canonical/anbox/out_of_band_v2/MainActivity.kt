@@ -17,7 +17,6 @@
  */
 package com.canonical.anbox.out_of_band_v2
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Build
@@ -32,10 +31,8 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.canonical.anbox.out_of_band_v2.DataReadTask.DataReadListener
-import com.google.android.material.snackbar.Snackbar
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.OutputStream
@@ -212,13 +209,13 @@ class MainActivity : AppCompatActivity(), DataReadListener {
     }
 
     override fun onDataRead(readBytes: ByteArray) {
-        val text = String(readBytes)
+        val jsonString = String(readBytes)
+//        val obj = Json.decodeFromString<AccelerometerData>(jsonString)
         val textView = findViewById<TextView>(R.id.textReceived)
         textView.text = """
-            ${textView.text}
-            $text
+            $jsonString
             """.trimIndent()
-        Log.i(TAG, "channel: $mConnectedChannel data: $text")
+        Log.i(TAG, "channel: $mConnectedChannel data: $jsonString")
     }
 
     private fun sendData(text: String) {
@@ -241,3 +238,6 @@ class MainActivity : AppCompatActivity(), DataReadListener {
         private const val TRANSACTION_connect = IBinder.FIRST_CALL_TRANSACTION
     }
 }
+//
+//@Serializable
+//private data class AccelerometerData(val x: Float, val y: Float, val z: Float)

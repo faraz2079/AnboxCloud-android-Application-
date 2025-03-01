@@ -28,6 +28,7 @@
         <service
             android:name=".out_of_band_v2"
             tools:ignore="MissingClass" />
+
         <receiver
             android:name=".DataChannelEventReceiver"
             android:enabled="true"
